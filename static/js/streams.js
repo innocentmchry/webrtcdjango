@@ -1,6 +1,6 @@
-const APP_ID = '238c526779984d018e9b5042c050aa7d'
+const APP_ID = 'bc9073d2d0ec40a080189fa5b36dfad5'
 const CHANNEL = 'main'
-const TOKEN = '007eJxTYPBVW824WO1XdkHApqvLbtn+z5vopqpptGuhSf3hpW6RB7YoMBgZWySbGpmZm1taWpikGBhapFommRqYGCUbmBokJpqn6GoapDYEMjI43p7NyMgAgSA+C0NuYmYeAwMA/dgd2Q=='
+const TOKEN = '007eJxTYOB+OzE5VX1P8VuRniU/jCdujT+k8KPn6b8Xz9P8FS8kvzVVYEhKtjQwN04xSjFITTYxSDSwMDC0sExLNE0yNktJS0wxNTIwSG0IZGQ48bmYiZEBAkF8FobcxMw8BgYA/OshuA=='
 
 
 
@@ -14,17 +14,11 @@ let remoteUsers = {}
 
 let joinAndDisplayLocalStream = async() => {
 
-    console.log("app id is", APP_ID)
-    console.log("channel is", CHANNEL)
-    console.log("token is", TOKEN)
-
-    // client.on('user-published', handleUserJoined)
-    // client.on('user-left', handleUserLeft)
+    client.on('user-published', handleUserJoined)
+    client.on('user-left', handleUserLeft)
 
     //uid is null so its returning a uid also it joins the channel or room
     UID = await client.join(APP_ID, CHANNEL, TOKEN, null)
-
-    // await client.join(APP_ID, CHANNEL, TOKEN, UID)
 
     // This will get user audio and video tracks and store them in array. [0] is audio [1] is camera track
     localTracks = await AgoraRTC.createMicrophoneAndCameraTracks()
