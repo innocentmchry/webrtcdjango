@@ -62,9 +62,9 @@ let handleUserJoined = async (user, mediaType) => {
         user.videoTrack.play(`user-${user.uid}`)
     }
 
-    // if(mediaType === 'audio'){
-    //     user.audioTrack.play()
-    // }
+    if(mediaType === 'audio'){
+        user.audioTrack.play()
+    }
 }
 
 let handleUserLeft = async (user) => {
