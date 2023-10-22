@@ -10,6 +10,20 @@
     <section id="video-streams">
     </section>
 
+    <section id="controls-wrapper">
+        <div class="icon-wrapper">
+            <img class="control-icon" id="mic-btn" src="{% static 'images/microphone.svg' %}" />
+        </div>
+
+        <div class="icon-wrapper">
+            <img class="control-icon" id="camera-btn" src="{% static 'images/video.svg' %}" />
+        </div>
+
+        <div class="icon-wrapper">
+            <img class="control-icon" id="leave-btn" src="{% static 'images/leave.svg' %}" />
+        </div>
+    </section>
+
 </main>
 <script src="{% static 'assets/AgoraRTC_N-4.19.1.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/streams.js' %}"></script>
