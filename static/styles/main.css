@@ -16,7 +16,7 @@ body {
 }
 
 #form-container{
-    width: 400px;
+    width: 500px;
     box-shadow: var(--shaddow);
     background-color: #fff;
     padding: 30px;
