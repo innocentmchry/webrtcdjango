@@ -8,7 +8,8 @@ let NAME = sessionStorage.getItem('name')
 // object or interface for providing the local client with basic funcs for voice and video calls such as joining stream and publishing tracks or subscrbing to other users tracks
 const client = AgoraRTC.createClient({mode: 'rtc', codec:'vp8'})
 
-let localTracks = []
+let videoTrack = []
+let audioTrack = []
 let remoteUsers = {} 
 
 let joinAndDisplayLocalStream = async() => {
@@ -25,27 +26,119 @@ let joinAndDisplayLocalStream = async() => {
         window.open('/', '_self')
     }
 
+    // Let me test something
+
+    // An object specifying the types of media to request.
+
+    var constraints = window.constraints = { audio: true, video: true};    
+    await navigator.mediaDevices.getUserMedia(constraints)
+        .then(function(stream) {
+            // Get all the available video tracks.
+            var videoTracks = stream.getVideoTracks();
+            console.log('Using video device: ' + videoTracks[0].label);
+
+           
+            videoTrack = AgoraRTC.createCustomVideoTrack({
+                mediaStreamTrack: videoTracks[0],
+            });
+
+        })
+        .catch(function(error) {
+        console.log(error);
+        });
 
 
-    // This will get user audio and video tracks and store them in array. [0] is audio [1] is camera track
-    localTracks = await AgoraRTC.createMicrophoneAndCameraTracks()
+
+
+
+
+    // videoTrack = await AgoraRTC.createCameraVideoTrack()
+
+    audioTrack = await AgoraRTC.createMicrophoneAudioTrack()
 
     let member = await createMember()
 
+    // let player = `<div class="video-container" id="user-container-${UID}">
+    // <div class="username-wrapper"><span class="user-name">${member.name}</span></div>
+    // <div class="video-player" id="user-${UID}"></div>
+    // </div>`
+
+    // let player = `<div class="video-container" id="user-container-${UID}">
+    // <div class="username-wrapper"><span class="user-name">${member.name}</span></div>
+    // <video class="video-player" id="user-${UID}" width="720" height="560" autoplay></video>
+    // </div>`
+
     let player = `<div class="video-container" id="user-container-${UID}">
     <div class="username-wrapper"><span class="user-name">${member.name}</span></div>
-    <div class="video-player" id="user-${UID}"></div>
+    <video class="video-player" id="user-${UID}" autoplay ></video>
     </div>`
     
     document.getElementById('video-streams').insertAdjacentHTML('beforeend', player)
 
     // looks for id inside dom and plays in our browser
-    localTracks[1].play(`user-${UID}`)
+    // videoTrack.play(`user-${UID}` , {fit : "cover"})
+
+
+    // I think I can do something here
+ 
+    const video = document.getElementById(`user-${UID}`)
+    Promise.all([
+        console.log("loading models"),
+        faceapi.nets.tinyFaceDetector.loadFromUri('/static/models'),
+        faceapi.nets.faceLandmark68Net.loadFromUri('/static/models'),
+        faceapi.nets.faceRecognitionNet.loadFromUri('/static/models'),
+        faceapi.nets.faceExpressionNet.loadFromUri('/static/models'),
+        console.log("loaded models")
+    ]).then(async () => {
+        videoTrack.play(`user-${UID}`, {fit : "cover"})
+
+        console.log("canvas element triggerred")
+        // const canvas = faceapi.createCanvas(video)
+        // document.body.append(canvas)
+    
+        const container = document.getElementById(`user-container-${UID}`)
+        const canvas = faceapi.createCanvas(video)
+        container.appendChild(canvas)
+    
+        // Set the position of the canvas to absolute
+        canvas.style.position = 'absolute';
+    
+        // Match the canvas size to the video element size
+    
+            
+        // Adjust the top and left properties to overlay the canvas on top of the video
+        canvas.style.top = '0';
+        canvas.style.left = '0';
+    
+        const displaySize = { width: video.width, height: video.height }
+        let dynamicVideoWidth = video.clientWidth;
+        let dynamicVideoHeight = video.clientHeight;
+        let dynamicDisplaySize = { width: dynamicVideoWidth, height: dynamicVideoHeight}
+
+        //faceapi.matchDimensions(canvas, displaySize)
+        setInterval(async () => {
+        console.log("canvas drawing started")
+        const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions()
+            dynamicVideoWidth = video.clientWidth;
+            dynamicVideoHeight = video.clientHeight;
+            canvas.width = dynamicVideoWidth;
+            canvas.height = dynamicVideoHeight;
+            dynamicDisplaySize = { width: dynamicVideoWidth, height: dynamicVideoHeight}
+            faceapi.matchDimensions(canvas, dynamicDisplaySize)
+            //const resizedDetections = faceapi.resizeResults(detections, displaySize)
+            const resizedDetections = faceapi.resizeResults(detections, dynamicDisplaySize)
+            canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
+            faceapi.draw.drawDetections(canvas, resizedDetections)
+            //faceapi.draw.drawFaceLandmarks(canvas, resizedDetections)
+            //faceapi.draw.drawFaceExpressions(canvas, resizedDetections)
+        }, 500)
+    })
 
     // this gonna publish for other users to see
-    await client.publish([localTracks[0], localTracks[1]])
-    
+    await client.publish([audioTrack, videoTrack])  
 }
+
+
 
 let handleUserJoined = async (user, mediaType) => {
     //add the user to remote users
@@ -84,10 +177,10 @@ let handleUserLeft = async (user) => {
 }
 
 let leaveAndRemoveLocalStream = async () => {
-    for (let i=0; localTracks.length > i; i++){
-        localTracks[i].stop()
-        localTracks[i].close()
-    }
+    audioTrack.stop()
+    audioTrack.close()
+    videoTrack.stop()
+    videoTrack.close()
 
     await client.leave()
 
@@ -96,21 +189,21 @@ let leaveAndRemoveLocalStream = async () => {
 }
 
 let toggleCamera = async (e) => {
-    if(localTracks[1].muted){
-        await localTracks[1].setMuted(false)
+    if(videoTrack.muted){
+        await videoTrack.setMuted(false)
         e.target.style.backgroundColor = '#fff'
     }else {
-        await localTracks[1].setMuted(true)
+        await videoTrack.setMuted(true)
         e.target.style.backgroundColor = 'rgb(255, 80, 80, 1)'
     }
 }
 
 let toggleMic = async (e) => {
-    if(localTracks[0].muted){
-        await localTracks[0].setMuted(false)
+    if(audioTrack.muted){
+        await audioTrack.setMuted(false)
         e.target.style.backgroundColor = '#fff'
     }else {
-        await localTracks[0].setMuted(true)
+        await audioTrack.setMuted(true)
         e.target.style.backgroundColor = 'rgb(255, 80, 80, 1)'
     }
 }
@@ -146,6 +239,39 @@ let deleteMember = async () => {
 
 }
 
+async function imageProcessing() {
+    console.log("canvas element triggerred")
+    // const canvas = faceapi.createCanvas(video)
+    // document.body.append(canvas)
+
+    const container = document.getElementById(`user-container-${UID}`)
+    const canvas = faceapi.createCanvas(video)
+    container.appendChild(canvas)
+
+    // Set the position of the canvas to absolute
+    canvas.style.position = 'absolute';
+
+    // Match the canvas size to the video element size
+
+        
+    // Adjust the top and left properties to overlay the canvas on top of the video
+    canvas.style.top = '0';
+    canvas.style.left = '0';
+
+    const displaySize = { width: video.width, height: video.height }
+    faceapi.matchDimensions(canvas, displaySize)
+    setInterval(async () => {
+    console.log("canvas drawing started")
+    const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions()
+        const resizedDetections = faceapi.resizeResults(detections, displaySize)
+        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
+        faceapi.draw.drawDetections(canvas, resizedDetections)
+        // faceapi.draw.drawFaceLandmarks(canvas, resizedDetections)
+        // faceapi.draw.drawFaceExpressions(canvas, resizedDetections)
+    }, 300)
+}
+
+
 joinAndDisplayLocalStream()
 
 // if member closes instead of leave button
@@ -154,4 +280,3 @@ window.addEventListener('beforeunload', deleteMember)
 document.getElementById('leave-btn').addEventListener('click', leaveAndRemoveLocalStream)
 document.getElementById('camera-btn').addEventListener('click', toggleCamera)
 document.getElementById('mic-btn').addEventListener('click', toggleMic)
-

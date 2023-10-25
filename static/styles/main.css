@@ -127,7 +127,7 @@ body {
     }
 }
 
-/* ---- ------ */
+/* ---- BUTTONS ------ */
 
 #controls-wrapper{
     display: flex;
@@ -151,5 +151,7 @@ body {
 #leave-btn{
     background-color: rgb(255, 80, 80, 1);
 }
+
+/* ------------- canvas ------------- */
 
 
