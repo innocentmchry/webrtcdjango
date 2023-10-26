@@ -117,7 +117,6 @@ let joinAndDisplayLocalStream = async() => {
 
         //faceapi.matchDimensions(canvas, displaySize)
         setInterval(async () => {
-        console.log("canvas drawing started")
         const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions()
             dynamicVideoWidth = video.clientWidth;
             dynamicVideoHeight = video.clientHeight;
