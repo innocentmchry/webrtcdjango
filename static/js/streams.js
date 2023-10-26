@@ -81,7 +81,7 @@ let joinAndDisplayLocalStream = async() => {
 
     // I think I can do something here
  
-    const video = document.getElementById(`user-${UID}`)
+
     Promise.all([
         console.log("loading models"),
         faceapi.nets.tinyFaceDetector.loadFromUri('/static/models'),
@@ -89,55 +89,52 @@ let joinAndDisplayLocalStream = async() => {
         faceapi.nets.faceRecognitionNet.loadFromUri('/static/models'),
         faceapi.nets.faceExpressionNet.loadFromUri('/static/models'),
         console.log("loaded models")
-    ]).then(async () => {
+    ]).then(() => {
+
         videoTrack.play(`user-${UID}`, {fit : "cover"})
+        imageProcessing(`user-${UID}`,`user-container-${UID}`)
 
-        console.log("canvas element triggerred")
-        // const canvas = faceapi.createCanvas(video)
-        // document.body.append(canvas)
-    
-        const container = document.getElementById(`user-container-${UID}`)
-        const canvas = faceapi.createCanvas(video)
-        container.appendChild(canvas)
-    
-        // Set the position of the canvas to absolute
-        canvas.style.position = 'absolute';
-    
-        // Match the canvas size to the video element size
-    
-            
-        // Adjust the top and left properties to overlay the canvas on top of the video
-        canvas.style.top = '0';
-        canvas.style.left = '0';
-    
-        const displaySize = { width: video.width, height: video.height }
-        let dynamicVideoWidth = video.clientWidth;
-        let dynamicVideoHeight = video.clientHeight;
-        let dynamicDisplaySize = { width: dynamicVideoWidth, height: dynamicVideoHeight}
-
-        //faceapi.matchDimensions(canvas, displaySize)
-        setInterval(async () => {
-        console.log("canvas drawing started")
-        const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions()
-            dynamicVideoWidth = video.clientWidth;
-            dynamicVideoHeight = video.clientHeight;
-            canvas.width = dynamicVideoWidth;
-            canvas.height = dynamicVideoHeight;
-            dynamicDisplaySize = { width: dynamicVideoWidth, height: dynamicVideoHeight}
-            faceapi.matchDimensions(canvas, dynamicDisplaySize)
-            //const resizedDetections = faceapi.resizeResults(detections, displaySize)
-            const resizedDetections = faceapi.resizeResults(detections, dynamicDisplaySize)
-            canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
-            faceapi.draw.drawDetections(canvas, resizedDetections)
-            //faceapi.draw.drawFaceLandmarks(canvas, resizedDetections)
-            //faceapi.draw.drawFaceExpressions(canvas, resizedDetections)
-        }, 500)
     })
 
     // this gonna publish for other users to see
     await client.publish([audioTrack, videoTrack])  
 }
 
+let imageProcessing = async (userId, containerId) => {
+    const video = document.getElementById(userId)
+
+    // const canvas = faceapi.createCanvas(video)
+    // document.body.append(canvas)
+    
+    const container = document.getElementById(containerId)
+    const canvas = faceapi.createCanvas(video)
+    container.appendChild(canvas)
+    
+    // Set the position of the canvas to absolute
+    canvas.style.position = 'absolute';
+           
+    // Adjust the top and left properties to overlay the canvas on top of the video
+    canvas.style.top = '0';
+    canvas.style.left = '0';
+    
+    let dynamicVideoWidth, dynamicVideoHeight, dynamicDisplaySize
+
+    setInterval(async () => {
+        const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions()
+        dynamicVideoWidth = video.clientWidth;
+        dynamicVideoHeight = video.clientHeight;
+        canvas.width = dynamicVideoWidth;
+        canvas.height = dynamicVideoHeight;
+        dynamicDisplaySize = { width: dynamicVideoWidth, height: dynamicVideoHeight}
+        faceapi.matchDimensions(canvas, dynamicDisplaySize)
+        //const resizedDetections = faceapi.resizeResults(detections, displaySize)
+        const resizedDetections = faceapi.resizeResults(detections, dynamicDisplaySize)
+        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
+        faceapi.draw.drawDetections(canvas, resizedDetections)
+        //faceapi.draw.drawFaceLandmarks(canvas, resizedDetections)
+        //faceapi.draw.drawFaceExpressions(canvas, resizedDetections)
+    }, 500)
+}
 
 
 let handleUserJoined = async (user, mediaType) => {
@@ -159,11 +156,13 @@ let handleUserJoined = async (user, mediaType) => {
 
         player = `<div class="video-container" id="user-container-${user.uid}">
         <div class="username-wrapper"><span class="user-name">${member.name}</span></div>
-        <div class="video-player" id="user-${user.uid}"></div>
+        <video class="video-player" id="user-${user.uid}" autoplay></video>
         </div>`
         
         document.getElementById('video-streams').insertAdjacentHTML('beforeend', player)
         user.videoTrack.play(`user-${user.uid}`)
+
+        imageProcessing(`user-${user.uid}`,`user-container-${user.uid}`)
     }
 
     if(mediaType === 'audio'){
@@ -239,37 +238,6 @@ let deleteMember = async () => {
 
 }
 
-async function imageProcessing() {
-    console.log("canvas element triggerred")
-    // const canvas = faceapi.createCanvas(video)
-    // document.body.append(canvas)
-
-    const container = document.getElementById(`user-container-${UID}`)
-    const canvas = faceapi.createCanvas(video)
-    container.appendChild(canvas)
-
-    // Set the position of the canvas to absolute
-    canvas.style.position = 'absolute';
-
-    // Match the canvas size to the video element size
-
-        
-    // Adjust the top and left properties to overlay the canvas on top of the video
-    canvas.style.top = '0';
-    canvas.style.left = '0';
-
-    const displaySize = { width: video.width, height: video.height }
-    faceapi.matchDimensions(canvas, displaySize)
-    setInterval(async () => {
-    console.log("canvas drawing started")
-    const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions()
-        const resizedDetections = faceapi.resizeResults(detections, displaySize)
-        canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
-        faceapi.draw.drawDetections(canvas, resizedDetections)
-        // faceapi.draw.drawFaceLandmarks(canvas, resizedDetections)
-        // faceapi.draw.drawFaceExpressions(canvas, resizedDetections)
-    }, 300)
-}
 
 
 joinAndDisplayLocalStream()
