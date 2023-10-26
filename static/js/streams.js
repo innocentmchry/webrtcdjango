@@ -93,49 +93,6 @@ let joinAndDisplayLocalStream = async() => {
 
         videoTrack.play(`user-${UID}`, {fit : "cover"})
         imageProcessing(`user-${UID}`,`user-container-${UID}`)
-
-<<<<<<< HEAD
-        console.log("canvas element triggerred")
-        // const canvas = faceapi.createCanvas(video)
-        // document.body.append(canvas)
-    
-        const container = document.getElementById(`user-container-${UID}`)
-        const canvas = faceapi.createCanvas(video)
-        container.appendChild(canvas)
-    
-        // Set the position of the canvas to absolute
-        canvas.style.position = 'absolute';
-    
-        // Match the canvas size to the video element size
-    
-            
-        // Adjust the top and left properties to overlay the canvas on top of the video
-        canvas.style.top = '0';
-        canvas.style.left = '0';
-    
-        const displaySize = { width: video.width, height: video.height }
-        let dynamicVideoWidth = video.clientWidth;
-        let dynamicVideoHeight = video.clientHeight;
-        let dynamicDisplaySize = { width: dynamicVideoWidth, height: dynamicVideoHeight}
-
-        //faceapi.matchDimensions(canvas, displaySize)
-        setInterval(async () => {
-        const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions()
-            dynamicVideoWidth = video.clientWidth;
-            dynamicVideoHeight = video.clientHeight;
-            canvas.width = dynamicVideoWidth;
-            canvas.height = dynamicVideoHeight;
-            dynamicDisplaySize = { width: dynamicVideoWidth, height: dynamicVideoHeight}
-            faceapi.matchDimensions(canvas, dynamicDisplaySize)
-            //const resizedDetections = faceapi.resizeResults(detections, displaySize)
-            const resizedDetections = faceapi.resizeResults(detections, dynamicDisplaySize)
-            canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
-            faceapi.draw.drawDetections(canvas, resizedDetections)
-            //faceapi.draw.drawFaceLandmarks(canvas, resizedDetections)
-            //faceapi.draw.drawFaceExpressions(canvas, resizedDetections)
-        }, 500)
-=======
->>>>>>> test
     })
 
     // this gonna publish for other users to see
