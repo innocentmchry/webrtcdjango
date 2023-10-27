@@ -16,7 +16,7 @@ body {
 }
 
 #form-container{
-    width: 500px;
+    width: 800px;
     box-shadow: var(--shaddow);
     background-color: #fff;
     padding: 30px;
@@ -29,7 +29,8 @@ body {
 
 #welcome-message{
     text-align: center;
-    margin: 20px;   
+    margin: 20px;
+  
 }
 
 #welcome-message h1{
@@ -38,6 +39,7 @@ body {
 
 #welcome-message p{
     font-size: 16px;
+    margin-bottom: 40px; 
 }
 
 .form-field{
@@ -62,6 +64,16 @@ body {
     border: none;
     color: #fff;
 }
+
+.form-field label {
+    font-size: 20px;
+}
+
+.form-field input[type="submit"] {
+    height: 45px;
+    margin-top: 20px;
+}
+
 
 @media screen and (max-width:450px){
     #form-container{

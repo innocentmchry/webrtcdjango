@@ -14,11 +14,16 @@
 
         <form id="form">
             <div class="form-field">
-                <input type="text" name="room" placeholder="Enter a room name..." style="text-transform:uppercase ;">
+                <label for="room">Room</label>
+                <input type="text" name="room" style="text-transform:uppercase ;" required >
             </div>
-
             <div class="form-field">
-                <input type="text" name="username" placeholder="Enter your name..." style="text-transform:uppercase ;">
+                <label for="email">Email</label>
+                <input type="email" name="email" required >
+            </div>
+            <div class="form-field">
+                <label for="username">Name</label>
+                <input type="text" name="username" required >
             </div>
 
             <div class="form-field">
@@ -35,6 +40,7 @@
         e.preventDefault()
         let room = e.target.room.value.toUpperCase()
         let name = e.target.username.value
+        let email = e.target.email.value
 
         let response = await fetch(`/get_token/?channel=${room}`)
         let data = await response.json()
@@ -46,6 +52,7 @@
         sessionStorage.setItem('token', token)
         sessionStorage.setItem('room', room)
         sessionStorage.setItem('name', name)
+        sessionStorage.setItem('email', email)
 
         window.open('/room/', '_self')
     }

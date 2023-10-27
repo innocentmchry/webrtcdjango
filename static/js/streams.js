@@ -4,13 +4,15 @@ const TOKEN = sessionStorage.getItem('token')
 let UID = Number(sessionStorage.getItem('UID'))
 
 let NAME = sessionStorage.getItem('name')
+let EMAIL = sessionStorage.getItem('email')
 
 // object or interface for providing the local client with basic funcs for voice and video calls such as joining stream and publishing tracks or subscrbing to other users tracks
 const client = AgoraRTC.createClient({mode: 'rtc', codec:'vp8'})
 
 let videoTrack = []
 let audioTrack = []
-let remoteUsers = {} 
+let remoteUsers = {}
+let ADMIN = false
 
 let joinAndDisplayLocalStream = async() => {
     document.getElementById('room-name').innerText = CHANNEL
@@ -19,16 +21,13 @@ let joinAndDisplayLocalStream = async() => {
     client.on('user-left', handleUserLeft)
 
     try {
-        //uid is null so its returning a uid also it joins the channel or room
         await client.join(APP_ID, CHANNEL, TOKEN, UID)
     } catch(e) {
         console.error(e)
         window.open('/', '_self')
     }
 
-    // Let me test something
-
-    // An object specifying the types of media to request.
+    //Custom Video Track
 
     var constraints = window.constraints = { audio: true, video: true};    
     await navigator.mediaDevices.getUserMedia(constraints)
@@ -48,25 +47,11 @@ let joinAndDisplayLocalStream = async() => {
         });
 
 
-
-
-
-
     // videoTrack = await AgoraRTC.createCameraVideoTrack()
 
     audioTrack = await AgoraRTC.createMicrophoneAudioTrack()
 
     let member = await createMember()
-
-    // let player = `<div class="video-container" id="user-container-${UID}">
-    // <div class="username-wrapper"><span class="user-name">${member.name}</span></div>
-    // <div class="video-player" id="user-${UID}"></div>
-    // </div>`
-
-    // let player = `<div class="video-container" id="user-container-${UID}">
-    // <div class="username-wrapper"><span class="user-name">${member.name}</span></div>
-    // <video class="video-player" id="user-${UID}" width="720" height="560" autoplay></video>
-    // </div>`
 
     let player = `<div class="video-container" id="user-container-${UID}">
     <div class="username-wrapper"><span class="user-name">${member.name}</span></div>
@@ -74,14 +59,22 @@ let joinAndDisplayLocalStream = async() => {
     </div>`
     
     document.getElementById('video-streams').insertAdjacentHTML('beforeend', player)
-
-    // looks for id inside dom and plays in our browser
-    // videoTrack.play(`user-${UID}` , {fit : "cover"})
-
-
-    // I think I can do something here
  
+    console.log("member role: ", member.role)
 
+    if (member.role == "admin"){
+        ADMIN = true
+        loadModels(`user-${UID}`, `user-container-${UID}`)
+    }
+    else {
+        videoTrack.play(`user-${UID}`, {fit : "cover"})
+    }
+
+    // this gonna publish for other users to see
+    await client.publish([audioTrack, videoTrack])  
+}
+
+let loadModels = (userId, containerId) => {
     Promise.all([
         console.log("loading models"),
         faceapi.nets.tinyFaceDetector.loadFromUri('/static/models'),
@@ -91,19 +84,14 @@ let joinAndDisplayLocalStream = async() => {
         console.log("loaded models")
     ]).then(() => {
 
-        videoTrack.play(`user-${UID}`, {fit : "cover"})
-        imageProcessing(`user-${UID}`,`user-container-${UID}`)
+        videoTrack.play(userId, {fit : "cover"})
+        imageProcessing(userId, containerId)
     })
-
-    // this gonna publish for other users to see
-    await client.publish([audioTrack, videoTrack])  
 }
+
 
 let imageProcessing = async (userId, containerId) => {
     const video = document.getElementById(userId)
-
-    // const canvas = faceapi.createCanvas(video)
-    // document.body.append(canvas)
     
     const container = document.getElementById(containerId)
     const canvas = faceapi.createCanvas(video)
@@ -161,7 +149,10 @@ let handleUserJoined = async (user, mediaType) => {
         document.getElementById('video-streams').insertAdjacentHTML('beforeend', player)
         user.videoTrack.play(`user-${user.uid}`)
 
-        imageProcessing(`user-${user.uid}`,`user-container-${user.uid}`)
+        if (ADMIN){
+            imageProcessing(`user-${user.uid}`,`user-container-${user.uid}`)
+        }
+
     }
 
     if(mediaType === 'audio'){
@@ -213,7 +204,7 @@ let createMember = async () => {
         headers:{
             'Content-Type':'application/json'
         },
-        body:JSON.stringify({'name':NAME, 'room_name':CHANNEL, 'UID': UID})
+        body:JSON.stringify({'name':NAME, 'room_name':CHANNEL, 'UID': UID, 'email': EMAIL})
     })
     let member = await response.json()
     return member

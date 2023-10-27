@@ -5,7 +5,7 @@ import random
 import time
 import json
 
-from .models import RoomMember
+from .models import RoomMember, Admin
 
 from django.views.decorators.csrf import csrf_exempt
 
@@ -38,12 +38,24 @@ def room(request):
 def createMember(request):
     data = json.loads(request.body)
     
+    # check if data['email'] is contained in a database named Admin which has column named email, if so assign the role as admin, other wise asign as participant
+
+    print(data)
+    email = data['email']
+    
+    try:
+        admin = Admin.objects.get(email=email)
+        role = "admin"
+    except Admin.DoesNotExist:
+        role = "participant"
+    
     member, created = RoomMember.objects.get_or_create(
         name=data['name'],
         uid=data['UID'],
-        room_name=data['room_name'] 
+        room_name=data['room_name'],
+        role=role
     )
-    return JsonResponse({'name':data['name']}, safe=False)
+    return JsonResponse({'name':data['name'], 'role':role}, safe=False)
 
 
 def getMember(request):
@@ -55,11 +67,13 @@ def getMember(request):
     member = RoomMember.objects.get(
         uid=uid,
         room_name=room_name,
+        
     )
     
     # returning back the name    
     name = member.name
-    return JsonResponse({'name':name}, safe=False)
+    role = member.role
+    return JsonResponse({'name':name, 'role':role}, safe=False)
 
 @csrf_exempt
 def deleteMember(request):
