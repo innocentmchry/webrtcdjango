@@ -64,7 +64,7 @@ let joinAndDisplayLocalStream = async() => {
 
     if (member.role == "admin"){
         ADMIN = true
-        loadModels(`user-${UID}`, `user-container-${UID}`)
+        await loadModels(`user-${UID}`, `user-container-${UID}`)
     }
     else {
         videoTrack.play(`user-${UID}`, {fit : "cover"})
@@ -74,7 +74,8 @@ let joinAndDisplayLocalStream = async() => {
     await client.publish([audioTrack, videoTrack])  
 }
 
-let loadModels = (userId, containerId) => {
+let loadModels = async (userId, containerId) => {
+    console.log("testt load models called")
     Promise.all([
         console.log("loading models"),
         faceapi.nets.tinyFaceDetector.loadFromUri('/static/models'),
@@ -83,7 +84,6 @@ let loadModels = (userId, containerId) => {
         faceapi.nets.faceExpressionNet.loadFromUri('/static/models'),
         console.log("loaded models")
     ]).then(() => {
-
         videoTrack.play(userId, {fit : "cover"})
         imageProcessing(userId, containerId)
     })
@@ -91,6 +91,7 @@ let loadModels = (userId, containerId) => {
 
 
 let imageProcessing = async (userId, containerId) => {
+    console.log("testt image processing called")
     const video = document.getElementById(userId)
     
     const container = document.getElementById(containerId)
@@ -119,8 +120,8 @@ let imageProcessing = async (userId, containerId) => {
         canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
         faceapi.draw.drawDetections(canvas, resizedDetections)
         //faceapi.draw.drawFaceLandmarks(canvas, resizedDetections)
-        //faceapi.draw.drawFaceExpressions(canvas, resizedDetections)
-    }, 500)
+        faceapi.draw.drawFaceExpressions(canvas, resizedDetections)
+    }, 300)
 }
 
 
@@ -150,7 +151,7 @@ let handleUserJoined = async (user, mediaType) => {
         user.videoTrack.play(`user-${user.uid}`)
 
         if (ADMIN){
-            imageProcessing(`user-${user.uid}`,`user-container-${user.uid}`)
+            await imageProcessing(`user-${user.uid}`,`user-container-${user.uid}`)
         }
 
     }
