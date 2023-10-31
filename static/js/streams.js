@@ -75,22 +75,20 @@ let joinAndDisplayLocalStream = async() => {
 }
 
 let loadModels = async (userId, containerId) => {
-    console.log("testt load models called")
-    Promise.all([
-        console.log("loading models"),
+
+    await Promise.all([
         faceapi.nets.tinyFaceDetector.loadFromUri('/static/models'),
         faceapi.nets.faceLandmark68Net.loadFromUri('/static/models'),
         faceapi.nets.faceRecognitionNet.loadFromUri('/static/models'),
-        faceapi.nets.faceExpressionNet.loadFromUri('/static/models'),
-        console.log("loaded models")
-    ]).then(() => {
-        videoTrack.play(userId, {fit : "cover"})
-        imageProcessing(userId, containerId)
-    })
+        faceapi.nets.faceExpressionNet.loadFromUri('/static/models')
+    ]);
+
+    videoTrack.play(userId, {fit : "cover"})
+    imageProcessing(userId, containerId)
 }
 
 
-let imageProcessing = async (userId, containerId) => {
+let imageProcessing = (userId, containerId) => {
     console.log("testt image processing called")
     const video = document.getElementById(userId)
     
@@ -151,7 +149,7 @@ let handleUserJoined = async (user, mediaType) => {
         user.videoTrack.play(`user-${user.uid}`)
 
         if (ADMIN){
-            await imageProcessing(`user-${user.uid}`,`user-container-${user.uid}`)
+            imageProcessing(`user-${user.uid}`,`user-container-${user.uid}`)
         }
 
     }
