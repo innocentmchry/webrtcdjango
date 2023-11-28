@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This project is a video conference web application that utilizes the WebRTC technology with the Agora SDK. The application is built using the Django framework and incorporates image processing techniques to analyze participant behavior.
+This is still an undergoing project which is basically a video conferencing web application that utilizes the WebRTC technology with the Agora SDK. The application is built using the Django framework and incorporates image processing techniques to analyze participant behavior.
 
 ## Features
 
@@ -11,6 +11,11 @@ This project is a video conference web application that utilizes the WebRTC tech
 - **Django Backend:** Utilize the Django framework to handle server-side logic, user authentication, and overall application structure.
 
 - **Computer Vision and Image Processing:** Implement video processing algorithms to analyze participant behavior during the video conference.
+
+## Demo
+
+![Screenshot (363)](https://github.com/innocentmchry/webrtcdjango/assets/103591230/0b9bb223-827b-4776-b346-6b4381c00f4c)
+
 
 ## Prerequisites
 
