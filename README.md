@@ -30,3 +30,8 @@ Before running the application, make sure you have the following dependencies in
 1. Clone the repository:
    ```bash
    git clone https://github.com/innocentmchry/webrtcdjango.git
+
+   
+## Acknowledgements
+
+I extend my sincere gratitude to the Central Institute of Technology Kokrajhar for the invaluable opportunity to contribute to this thrilling project. Special thanks to my supervisor Dr. Ranjan Maity who has provided me immense support to carry out this project.
